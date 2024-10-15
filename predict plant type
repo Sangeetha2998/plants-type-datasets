@@ -1,0 +1,48 @@
+import os
+import glob
+import numpy as np
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from sklearn.model_selection import train_test_split
+import pandas as pd
+
+from tensorflow.keras import mixed_precision
+
+policy = mixed_precision.Policy('mixed_float16')
+
+# Clone the dataset repository
+!git clone https://github.com/Joevinoth/dataset.git
+
+# Define the root directory of the dataset
+root_dir = 'dataset/split_ttv_dataset_type_of_plants/Train_Set_Folder'
+
+# Define the image dimensions
+img_width, img_height = 224, 224
+
+# Define the batch size
+batch_size = 128
+
+# Create a list to store the images
+images = []
+
+# Iterate through each folder in the root directory
+for folder in os.listdir(root_dir):
+    # Iterate through each file in the folder
+    for file in glob.glob(os.path.join(root_dir, folder, '*.jpg')):
+        # Add the image file to the list
+        images.append((file, folder))
+
+# Split the data into training and validation sets
+train_images, val_images = train_test_split(images, test_size=0.2, random_state=42)
+
+# Create a data generator for training
+train_datagen = ImageDataGenerator(
+    rescale=1./255,
+shear_range=0.2,
+    zoom_range=0.2,
+    horizontal_flip=True,
+    rotation_range=30,
+    width_shift_range=0.1,
+    height_shift_range=0.1
+)
